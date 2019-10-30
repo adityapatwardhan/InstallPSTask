@@ -13,14 +13,10 @@
     "@types/unzip": "^0.1.1",
     "azure-pipelines-task-lib": "^2.9.3",
     "fetch": "^1.1.0",
-    "fstream": "^1.0.12",
-    "jQuery": "^1.7.4",
-    "jquery": "^3.4.1",
     "node-fetch": "^2.6.0",
     "unzip": "^0.1.11"
   },
   "devDependencies": {
-    "@types/jquery": "^3.3.31",
     "@types/node": "^12.11.7",
     "@types/q": "^1.5.2"
   }
