@@ -2,8 +2,10 @@ import tl = require('azure-pipelines-task-lib/task');
 import fs = require('fs');
 import fetch from 'node-fetch';
 import https = require('https');
-import unzip = require('unzip');
+import unzip = require('unzipper');
 import path = require('path');
+import tar = require('tar');
+import rimraf = require('rimraf');
 
 class PSMetadata {
     constructor(
@@ -72,10 +74,14 @@ async function run() {
             case tl.Platform.Linux:
                 packageName = 'powershell-' + selectedTag.substring(1) + '-linux-x64.tar.gz';
                 downloadUrl += packageName;
+                await downloadAndUntarPackage(packageName, downloadUrl);
+                break;
 
             case tl.Platform.Linux:
-                    packageName = 'powershell-' + selectedTag.substring(1) + '-osx-x64.tar.gz';
-                    downloadUrl += packageName;
+                packageName = 'powershell-' + selectedTag.substring(1) + '-osx-x64.tar.gz';
+                downloadUrl += packageName;
+                await downloadAndUntarPackage(packageName, downloadUrl);
+                break;
 
             default:
                 break;
@@ -95,8 +101,35 @@ async function downloadAndUnzipPackage(packageName: string, downloadUrl: string)
             resp.pipe(file);
             file.on('finish', () => {
                 file.close(); console.log('file download completed');
-                var archive = path.join(__dirname, packageName);
-                fs.createReadStream(archive).pipe(unzip.Extract({ path: 'output' }));
+                const archive = path.join(__dirname, packageName);
+
+                const outputPath = path.join(__dirname, 'output');
+                fs.createReadStream(archive).pipe(unzip.Extract({ path: outputPath }));
+            })
+        });
+}
+
+async function downloadAndUntarPackage(packageName: string, downloadUrl: string) {
+    console.log('Download url: ' + downloadUrl );
+    const file = fs.createWriteStream(packageName);
+        const req = https.get(downloadUrl, resp => {
+            resp.pipe(file);
+            file.on('finish', () => {
+                file.close(); console.log('file download completed');
+                const archive = path.join(__dirname, packageName);
+                const outputPath = path.join(__dirname, 'output');
+
+                if (fs.existsSync(outputPath)) {
+                    rimraf.sync(outputPath);
+                }
+
+                fs.mkdirSync(outputPath);
+
+                fs.createReadStream(archive).pipe(
+                    tar.x({
+                      C: outputPath
+                    })
+                  )
             })
         });
 }

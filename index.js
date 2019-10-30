@@ -43,8 +43,10 @@ var tl = require("azure-pipelines-task-lib/task");
 var fs = require("fs");
 var node_fetch_1 = __importDefault(require("node-fetch"));
 var https = require("https");
-var unzip = require("unzip");
+var unzip = require("unzipper");
 var path = require("path");
+var tar = require("tar");
+var rimraf = require("rimraf");
 var PSMetadata = /** @class */ (function () {
     function PSMetadata(StableReleaseTag, PreviewReleaseTag, ServicingReleaseTag, ReleaseTag, NextReleaseTag) {
     }
@@ -61,7 +63,7 @@ function run() {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 16, , 17]);
+                    _c.trys.push([0, 18, , 19]);
                     channel = tl.getInput('channel', true);
                     extension = '';
                     downloadUrl = '';
@@ -106,31 +108,37 @@ function run() {
                     switch (_b) {
                         case tl.Platform.Windows: return [3 /*break*/, 10];
                         case tl.Platform.Linux: return [3 /*break*/, 12];
-                        case tl.Platform.Linux: return [3 /*break*/, 13];
+                        case tl.Platform.Linux: return [3 /*break*/, 14];
                     }
-                    return [3 /*break*/, 14];
+                    return [3 /*break*/, 16];
                 case 10:
                     packageName = 'PowerShell-' + selectedTag.substring(1) + '-win-x64.zip';
                     downloadUrl += packageName;
                     return [4 /*yield*/, downloadAndUnzipPackage(packageName, downloadUrl)];
                 case 11:
                     _c.sent();
-                    return [3 /*break*/, 15];
+                    return [3 /*break*/, 17];
                 case 12:
                     packageName = 'powershell-' + selectedTag.substring(1) + '-linux-x64.tar.gz';
                     downloadUrl += packageName;
-                    _c.label = 13;
+                    return [4 /*yield*/, downloadAndUntarPackage(packageName, downloadUrl)];
                 case 13:
+                    _c.sent();
+                    return [3 /*break*/, 17];
+                case 14:
                     packageName = 'powershell-' + selectedTag.substring(1) + '-osx-x64.tar.gz';
                     downloadUrl += packageName;
-                    _c.label = 14;
-                case 14: return [3 /*break*/, 15];
-                case 15: return [3 /*break*/, 17];
-                case 16:
+                    return [4 /*yield*/, downloadAndUntarPackage(packageName, downloadUrl)];
+                case 15:
+                    _c.sent();
+                    return [3 /*break*/, 17];
+                case 16: return [3 /*break*/, 17];
+                case 17: return [3 /*break*/, 19];
+                case 18:
                     error_1 = _c.sent();
                     tl.setResult(tl.TaskResult.Failed, error_1.message);
-                    return [3 /*break*/, 17];
-                case 17: return [2 /*return*/];
+                    return [3 /*break*/, 19];
+                case 19: return [2 /*return*/];
             }
         });
     });
@@ -147,7 +155,34 @@ function downloadAndUnzipPackage(packageName, downloadUrl) {
                     file.close();
                     console.log('file download completed');
                     var archive = path.join(__dirname, packageName);
-                    fs.createReadStream(archive).pipe(unzip.Extract({ path: 'output' }));
+                    var outputPath = path.join(__dirname, 'output');
+                    fs.createReadStream(archive).pipe(unzip.Extract({ path: outputPath }));
+                });
+            });
+            return [2 /*return*/];
+        });
+    });
+}
+function downloadAndUntarPackage(packageName, downloadUrl) {
+    return __awaiter(this, void 0, void 0, function () {
+        var file, req;
+        return __generator(this, function (_a) {
+            console.log('Download url: ' + downloadUrl);
+            file = fs.createWriteStream(packageName);
+            req = https.get(downloadUrl, function (resp) {
+                resp.pipe(file);
+                file.on('finish', function () {
+                    file.close();
+                    console.log('file download completed');
+                    var archive = path.join(__dirname, packageName);
+                    var outputPath = path.join(__dirname, 'output');
+                    if (fs.existsSync(outputPath)) {
+                        rimraf.sync(outputPath);
+                    }
+                    fs.mkdirSync(outputPath);
+                    fs.createReadStream(archive).pipe(tar.x({
+                        C: outputPath
+                    }));
                 });
             });
             return [2 /*return*/];

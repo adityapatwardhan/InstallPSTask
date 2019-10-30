@@ -1,8 +1,9 @@
 {
-  "name": "pspreviewtask",
+  "name": "installpowershelltask",
   "version": "1.0.0",
   "description": "Task to install latest PowerShell Preview from https://github.com/PowerShell/PowerShell",
   "main": "index.js",
+  "repository": "https://github.com/adityapatwardhan/InstallPSTask",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,11 +11,15 @@
   "license": "MIT",
   "dependencies": {
     "@types/node-fetch": "^2.5.2",
-    "@types/unzip": "^0.1.1",
+    "@types/rimraf": "^2.0.3",
+    "@types/tar": "^4.0.3",
+    "@types/unzipper": "^0.10.0",
     "azure-pipelines-task-lib": "^2.9.3",
     "fetch": "^1.1.0",
     "node-fetch": "^2.6.0",
-    "unzip": "^0.1.11"
+    "rimraf": "^3.0.0",
+    "tar": "^5.0.5",
+    "unzipper": "^0.10.5"
   },
   "devDependencies": {
     "@types/node": "^12.11.7",

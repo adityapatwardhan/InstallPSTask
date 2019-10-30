@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
     "id": "2e8a785a-96c9-40f5-a5f8-bc67af9e8d5a",
-    "name": "PSPreviewInstall",
+    "name": "InstallPSTask",
     "friendlyName": "Install PowerShell",
     "description": "Install the latest PowerShell from https://github.com/PowerShell/PowerShell",
     "helpMarkDown": "Install the latest PowerShell from https://github.com/PowerShell/PowerShell",
@@ -12,7 +12,7 @@
         "Minor": 1,
         "Patch": 0
     },
-    "instanceNameFormat": "Install PowerShell version: $(version)",
+    "instanceNameFormat": "Install PowerShell - $(channel)",
     "inputs": [
         {
             "name": "channel",
